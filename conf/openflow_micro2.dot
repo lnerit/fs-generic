@@ -1,0 +1,66 @@
+graph test {
+    // global settings for measurements
+    counterexportfile="counters"
+    flowexport=text
+    flowsampling=1.0
+    pktsampling=1.0
+    exportcycle=60
+    counterexport=True
+    counterexportinterval=1
+    longflowtmo=60
+    flowinactivetmo=60
+
+    a [ 
+        type="OpenflowSwitch"
+        controller="controller"
+        autoack="False"
+        ipdests="10.3.0.0/16 10.5.0.0/16"
+        traffic="m1"
+	// tracePkt="True"
+        // udp vbr flows 
+        m1="modulator start=5 generator=s1 profile=((3600,),(5,))"
+        s1="simple ipsrc=10.1.1.0/24 ipdst=10.5.0.0/24 flowlets=1 dport=randomunifint(1024,65535) sport=randomunifint(1024,65535) ipproto=udp pkts=normal(600,10) bytes=normal(625000,100) continuous=True fps=1"
+    ];
+
+    b [ 
+        type="OpenflowSwitch"
+        controller="controller"
+        autoack="False"
+        ipdests="10.5.0.0/24 10.0.0.0/8" 
+	// tracePkt="True"
+    ];
+
+    c [ 
+        type="OpenflowSwitch"
+        controller="controller"
+        autoack="False"
+        ipdests="10.0.0.0/8" 
+	// tracePkt="True"
+    ];
+
+    d [ 
+        type="OpenflowSwitch"
+        controller="controller"
+        autoack="False"
+        ipdests="10.5.0.0/24" 
+	// tracePkt="True"
+    ];
+    
+    controller [
+        type="OpenflowController"
+	components="pox.forwarding.micro2_before"
+	// components="pox.forwarding.micro2_after"
+    ];
+
+    // data path links 
+    a -- b [weight=10, capacity=100000000, delay=0.04];
+    b -- c [weight=10, capacity=100000000, delay=0.04];
+    b -- d [weight=10, capacity=100000000, delay=0.04];
+    a -- c [weight=10, capacity=100000000, delay=0.04];
+
+    // control links between ofcontroller and each ofswitch
+    a -- controller [ capacity=1000000000, delay=1.00 ]
+    b -- controller [ capacity=1000000000, delay=1.00 ]
+    c -- controller [ capacity=1000000000, delay=1.00 ]
+    d -- controller [ capacity=1000000000, delay=1.00 ]
+}
