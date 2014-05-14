@@ -171,21 +171,9 @@ def load_pox_component(name):
         log.error("Error trying to import {} POX component".format(name))
         raise RuntimeError(str(e))
 
-## TODO: Get this option from config file
-controller = "POX"
-log = get_logger()
-
-if controller == "POX":
-    log.info("Using POX controller")
-    monkey_patch_pox()
-    load_pox_component("pox.openflow")
-    get_logger().info("Kicking POX Up")
-    pox.core.core.goUp()
-    get_logger().info("POX components: {}".format(pox.core.core.components))
-    from pox_bridge import *
-
-elif controller == "OpenDaylight":
-    log.info("Using OpenDaylight controller")
-
-else:
-    raise RuntimeError("Controller type not specified")
+monkey_patch_pox()
+load_pox_component("pox.openflow")
+get_logger().info("Kicking POX Up")
+pox.core.core.goUp()
+get_logger().debug("POX components: {}".format(pox.core.core.components))
+from pox_bridge import *

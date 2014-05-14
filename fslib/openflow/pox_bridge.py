@@ -427,4 +427,3 @@ class OpenflowController(Node):
         for component in self.components:
             self.logger.debug("Starting OF Controller Component {}".format(component))
             load_pox_component(component)
-

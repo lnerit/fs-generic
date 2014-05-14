@@ -14,7 +14,6 @@ from heapq import heappush, heappop, heapify
 from fslib.configurator import NullTopology, FsConfigurator
 import fslib.common as fscommon
 import random
-# from fsdb import pdb as bp
 
 class FsCore(object):
     '''Core simulation object --- handles event scheduling and
@@ -181,7 +180,6 @@ def main():
 
     random.seed(options.seed)
     fscommon.setup_logger(options.logfile, options.debug)
-
     sim = FsCore(options.interval, endtime=options.simtime, debug=options.debug)
     signal.signal(signal.SIGINT, sim.sighandler)
     sys.path.append(".")
