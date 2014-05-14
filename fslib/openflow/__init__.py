@@ -146,7 +146,7 @@ def load_pox_component(name):
     '''Load a pox component by trying to import the named module and
        invoking launch().  Raise a runtime error if something goes wrong.'''
 
-
+    print "MP happens here? 3"
     log = get_logger()
     try:
         m = import_module(name)
@@ -171,6 +171,7 @@ def load_pox_component(name):
         log.error("Error trying to import {} POX component".format(name))
         raise RuntimeError(str(e))
 
+print "MP happens here? 2"
 monkey_patch_pox()
 load_pox_component("pox.openflow")
 get_logger().info("Kicking POX Up")

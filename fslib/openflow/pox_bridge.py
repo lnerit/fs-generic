@@ -423,7 +423,6 @@ class OpenflowController(Node):
 
         # remove self from networkx graph (topology)
         fscore().topology.remove_node(self.name)
-
         for component in self.components:
             self.logger.debug("Starting OF Controller Component {}".format(component))
             load_pox_component(component)

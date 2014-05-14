@@ -20,6 +20,7 @@ from fslib.common import fscore
 from networkx import single_source_dijkstra_path, single_source_dijkstra_path_length, read_gml, read_dot
 from networkx.readwrite import json_graph
 
+from socket import *
 
 class InvalidTrafficSpecification(Exception):
     pass
@@ -399,6 +400,17 @@ class FsConfigurator(object):
             self.logger.debug("link {}->{}: {}".format(xtup[0], xtup[1], lobj))
         self.logger.debug("*** End Configuration Dump ***".center(30))
 
+    def checkController(self, ctype, addr, port):
+        s = socket(AF_INET, SOCK_STREAM)
+        result = s.connect_ex((addr, port))
+
+        if (result == 0):
+            self.logger.info('{} controller is running in {}:{}'.format(ctype,\
+            addr, port))
+        else:
+            self.logger.info('{} controller is not running'.format(ctype))
+        s.close()
+
     def __addupd_router(self, rname, rdict, measurement_config):
         robj = None
         if rname not in self.nodes:
@@ -411,10 +423,36 @@ class FsConfigurator(object):
             m = import_module("fslib.node")
             cls = getattr(m, ctype, None)
             if not cls:
+
+                print "MP happens here? 1"
+
+                # This will be changed...
                 m = import_module("fslib.openflow")
+                
+                # Changed this patching zone. Here we should look for the
+                # controllers - scanning logic. For now, let's do a static
+                # lookup. 
+                # FIXME: Scanning logic will be added later after deadline
+                # Move this logic to a separate class
+                # Connect based on controllerType - POX, ODL
+                # POX runs in 127.0.0.1:6634
+                # OpenDaylight runs in TBD
+
+                cType = 'POX'
+                cAddr = '127.0.0.1'
+                cPort = 6634
+                if cType == 'POX' or cType == 'ODL':
+                    self.checkController(cType, cAddr, cPort)
+                else:
+                    raise Exception('Other controller types not supported!')
+                print "MP happens here? 4"
+                
+                # print cls, m, ctype
                 cls = getattr(m, ctype, None)
                 if not cls:
                     raise InvalidTrafficSpecification('Unrecognized node type {}.'.format(ctype))
+
+            # print rname
             robj = cls(rname, measurement_config, **rdict)
             self.nodes[rname] = robj
         else:
