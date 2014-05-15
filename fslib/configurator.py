@@ -422,11 +422,12 @@ class FsConfigurator(object):
 
             m = import_module("fslib.node")
             cls = getattr(m, ctype, None)
+
             if not cls:
+                # print "MP happens here? Start - level 1"
 
-                print "MP happens here? 1"
-
-                # This will be changed...
+                ## Change zone ##
+                # TODO: To be Deprecated. This will be changed...
                 m = import_module("fslib.openflow")
                 
                 # Changed this patching zone. Here we should look for the
@@ -437,15 +438,24 @@ class FsConfigurator(object):
                 # Connect based on controllerType - POX, ODL
                 # POX runs in 127.0.0.1:6634
                 # OpenDaylight runs in TBD
+                
+                conType = 'POX'
+                conAddr = '127.0.0.1'
+                conPort = 6634
+                # cType = 'ODL'
+                # cAddr = '127.0.0.1'
+                # cPort = 6633
 
-                cType = 'POX'
-                cAddr = '127.0.0.1'
-                cPort = 6634
-                if cType == 'POX' or cType == 'ODL':
-                    self.checkController(cType, cAddr, cPort)
+                if conType == 'POX' or conType == 'ODL':
+                    if ctype == 'OpenflowController':
+                        self.checkController(conType, conAddr, conPort)
+                    elif ctype == 'OpenflowSwitch':
+                        self.logger.info('Switch')
+                    else:
+                        raise Exception('Invalid OF Component')
                 else:
                     raise Exception('Other controller types not supported!')
-                print "MP happens here? 4"
+                # print "MP happens here? End - level 1\n"
                 
                 # print cls, m, ctype
                 cls = getattr(m, ctype, None)
@@ -454,6 +464,7 @@ class FsConfigurator(object):
 
             # print rname
             robj = cls(rname, measurement_config, **rdict)
+            # print dir(robj)
             self.nodes[rname] = robj
         else:
             robj = self.nodes[rname]

@@ -146,7 +146,7 @@ def load_pox_component(name):
     '''Load a pox component by trying to import the named module and
        invoking launch().  Raise a runtime error if something goes wrong.'''
 
-    print "MP happens here? 3"
+    # print "MP happens here? 3"
     log = get_logger()
     try:
         m = import_module(name)
@@ -155,7 +155,6 @@ def load_pox_component(name):
             raise RuntimeError('No launch function in module {}'.format(name))
         else:
             log.debug("Loading POX component {}".format(name))
-
             # FIXME: component launch needs some rework.
             # import pox.boot
             # pox.boot._do_launch([name])
@@ -171,10 +170,13 @@ def load_pox_component(name):
         log.error("Error trying to import {} POX component".format(name))
         raise RuntimeError(str(e))
 
-print "MP happens here? 2"
+## Change zone ##
+# print "MP happens here? 2"
 monkey_patch_pox()
 load_pox_component("pox.openflow")
-get_logger().info("Kicking POX Up")
-pox.core.core.goUp()
+# get_logger().info("Kicking POX Up")
+# pox.core.core.goUp()
 get_logger().debug("POX components: {}".format(pox.core.core.components))
+# print "MP - 5"
 from pox_bridge import *
+# print "MP - 6"
