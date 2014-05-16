@@ -21,6 +21,7 @@ from networkx import single_source_dijkstra_path, single_source_dijkstra_path_le
 from networkx.readwrite import json_graph
 
 from socket import *
+import time
 
 class InvalidTrafficSpecification(Exception):
     pass
@@ -400,18 +401,33 @@ class FsConfigurator(object):
             self.logger.debug("link {}->{}: {}".format(xtup[0], xtup[1], lobj))
         self.logger.debug("*** End Configuration Dump ***".center(30))
 
-    def checkController(self, ctype, addr, port):
-        ''' basic dummy check
-            TODO: Write something robust using telnet'''
-        s = socket(AF_INET, SOCK_STREAM)
-        result = s.connect_ex((addr, port))
+    def __check_controller(self, ctype, addr, port):
+        ''' basic dummy check at a port
+            TODO: Write something robust - may be telnet telnet'''
+        try:
+            s = socket(AF_INET, SOCK_STREAM)
+            result = s.connect_ex((addr, port))
+            if (result == 0):
+                self.logger.info('{} controller is running in {}:{}'.format(ctype,\
+                                 addr, port))
+                return True
+            else:
+                self.logger.info('{} controller is not running'.format(ctype))
+                return False
+        except:
+            raise Exception('Cannot connect using sockets')
+        finally:
+            s.close()
 
-        if (result == 0):
-            self.logger.info('{} controller is running in {}:{}'.format(ctype,\
-            addr, port))
-        else:
-            self.logger.info('{} controller is not running'.format(ctype))
-        s.close()
+    def __wait_until_controller(self, conType, conAddr, conPort, timeOut, pollPeriod):
+        ''' conditional wait for timeOut seconds by polling every pollPeriod seconds to 
+        check if the controller is running '''
+        mustend = time.time() + timeOut
+        while time.time() < mustend:
+            isControllerRunning = self.__check_controller(conType, conAddr, conPort)
+            if isControllerRunning: return True
+            time.sleep(pollPeriod)
+        return False
 
     def __addupd_router(self, rname, rdict, measurement_config):
         robj = None
@@ -420,57 +436,53 @@ class FsConfigurator(object):
             self.logger.debug('Adding node {} type {} config {}'.format(rname,ctype,rdict))
 
             # ctype is the ClassName of the node to construct.
-            # the class may be in fslib.node or fslib.openflow
+            # the class may be in fslib.node or fslib.openflow or fslib.proxy
 
             m = import_module("fslib.node")
             cls = getattr(m, ctype, None)
 
             if not cls:
-                # print "MP happens here? Start - level 1"
-
                 ## Change zone ##
-                # TODO: To be Deprecated. This is changed...
-                m = import_module("fslib.openflow")
                 
-                # Changed this patching zone. Here we should look for the
-                # controllers - scanning logic. For now, let's do a static
-                # lookup. 
+                # This is to be deprecated
+                m1 = import_module("fslib.openflow")
 
-                # FIXME: Scanning logic will be added later after deadline
-                # Move this logic to a separate class
+                # FIXME: Enhanced control scan will be added later after deadline
                 # Connect based on controllerType - POX, ODL
-                # POX runs in 127.0.0.1:6634
-                # OpenDaylight runs in TBD
+                # POX runs in 127.0.0.1:6633
+                # OpenDaylight runs in 127.0.0.1:6633
+                # Do a conditional wait until controllers are started
+                # Only when the controllers are running, start the simulation
                 
-                conType = 'ODL'
+                conType = 'ODL' # or 'POX'
                 conAddr = '127.0.0.1'
                 conPort = 6633
+                timeOut = 120 # two minutes to timeout the conditional wait
+                pollPeriod = 10 # poll once every 10 seconds
 
                 if conType == 'POX' or conType == 'ODL':
-                    self.checkController(conType, conAddr, conPort)
                     if ctype == 'OpenflowController':
-                        self.logger.info('Controller')
+                        self.logger.debug('Controller')
+                        # no point in running simulations with controllers
+                        self.__wait_until_controller(conType, conAddr, conPort,\
+                                                 timeOut, pollPeriod)
                     elif ctype == 'OpenflowSwitch':
-                        self.logger.info('Switch')
+                        self.logger.debug('Switch')
                     else:
                         raise Exception('Invalid OF Component')
                 else:
                     raise Exception('Other controller types not supported!')
-                # print "MP happens here? End - level 1\n"
                 
-                # print cls, m, ctype
+                m = import_module("fslib.proxy")
                 cls = getattr(m, ctype, None)
                 if not cls:
                     raise InvalidTrafficSpecification('Unrecognized node type {}.'.format(ctype))
 
-            # print rname
             robj = cls(rname, measurement_config, **rdict)
-            # print dir(robj)
             self.nodes[rname] = robj
         else:
             robj = self.nodes[rname]
         return robj
-
 
     def __configure_parallel_universe(self, measurement_config, measurement_nodes):
         '''

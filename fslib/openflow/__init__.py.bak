@@ -4,9 +4,6 @@
 
 # version 2: direct integration and monkeypatching of POX
 
-## Change zone ##
-# version 3: this file is deprecated and monkeypatching is not used anymore
-
 from fslib.common import fscore, get_logger
 from fslib.node import Node
 from importlib import import_module
@@ -173,6 +170,7 @@ def load_pox_component(name):
         log.error("Error trying to import {} POX component".format(name))
         raise RuntimeError(str(e))
 
+## Change zone ##
 ## TODO: Remove all these -- no patching
 # print "MP happens here? 2"
 monkey_patch_pox()
