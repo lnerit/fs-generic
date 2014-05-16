@@ -171,6 +171,7 @@ def load_pox_component(name):
         raise RuntimeError(str(e))
 
 ## Change zone ##
+## TODO: Remove all these -- no patching
 # print "MP happens here? 2"
 monkey_patch_pox()
 load_pox_component("pox.openflow")

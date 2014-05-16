@@ -401,6 +401,8 @@ class FsConfigurator(object):
         self.logger.debug("*** End Configuration Dump ***".center(30))
 
     def checkController(self, ctype, addr, port):
+        ''' basic dummy check
+            TODO: Write something robust using telnet'''
         s = socket(AF_INET, SOCK_STREAM)
         result = s.connect_ex((addr, port))
 
@@ -427,28 +429,27 @@ class FsConfigurator(object):
                 # print "MP happens here? Start - level 1"
 
                 ## Change zone ##
-                # TODO: To be Deprecated. This will be changed...
+                # TODO: To be Deprecated. This is changed...
                 m = import_module("fslib.openflow")
                 
                 # Changed this patching zone. Here we should look for the
                 # controllers - scanning logic. For now, let's do a static
                 # lookup. 
+
                 # FIXME: Scanning logic will be added later after deadline
                 # Move this logic to a separate class
                 # Connect based on controllerType - POX, ODL
                 # POX runs in 127.0.0.1:6634
                 # OpenDaylight runs in TBD
                 
-                conType = 'POX'
+                conType = 'ODL'
                 conAddr = '127.0.0.1'
-                conPort = 6634
-                # cType = 'ODL'
-                # cAddr = '127.0.0.1'
-                # cPort = 6633
+                conPort = 6633
 
                 if conType == 'POX' or conType == 'ODL':
+                    self.checkController(conType, conAddr, conPort)
                     if ctype == 'OpenflowController':
-                        self.checkController(conType, conAddr, conPort)
+                        self.logger.info('Controller')
                     elif ctype == 'OpenflowSwitch':
                         self.logger.info('Switch')
                     else:
