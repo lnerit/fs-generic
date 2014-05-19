@@ -358,6 +358,7 @@ class OpenflowSwitch(Node):
 
 '''
 Old version written by Joel
+This is changed in the latest proxy version of the tool
 
 class OpenflowController(Node):
     __slots__ = ['components', 'switch_links']
@@ -378,7 +379,7 @@ class OpenflowController(Node):
         eventually build ofcore.Connection objects for each one
         once start() gets called.
         xconn = ofcore.Connection(-1, self.controller_to_switch, next_node, link.egress_node.dpid)
-        print xconn, ofcore, next_node, link.egress_node.dpid
+        # print xconn, ofcore, next_node, link.egress_node.dpid
         self.switch_links[next_node] = (xconn, link)
 
     def controller_to_switch(self, switchname, mesg):
@@ -403,9 +404,11 @@ class OpenflowController(Node):
             self.logger.debug("Starting OF Controller Component {}".format(component))
 '''
 
-''' From the new version OpenflowController class will act as a proxy between
+''' 
+From the new version OpenflowController class will act as a proxy between
 the controller and the switches. All the messages exchanged between the
-controller and switches are transparent to this class'''
+controller and switches are transparent to this class
+'''
 
 class OpenflowController(Node):
     __slots__ = ['components', 'switch_links']
@@ -426,8 +429,9 @@ class OpenflowController(Node):
         eventually build ofcore.Connection objects for each one
         once start() gets called.'''
         xconn = ofcore.Connection(-1, self.controller_to_switch, next_node, link.egress_node.dpid)
-        print xconn, ofcore, next_node, link.egress_node.dpid
+        # print xconn, ofcore, next_node, link.egress_node.dpid
         self.switch_links[next_node] = (xconn, link)
+        print self.switch_links[next_node]
 
     def controller_to_switch(self, switchname, mesg):
         '''Ferry an OF message from controller to switch'''

@@ -1,0 +1,193 @@
+========== Comparing Number of Switches ==========
+** Same Switches **
+
+========== Performance Comparison for counters ==========
+** Average Flows Per Second for /Users/ram/Desktop/RAM/Project/fs-master/TD2 **
+a - 47
+c - 23
+b - 47
+controller - 0
+** Average Bytes Per Second /Users/ram/Desktop/RAM/Project/fs-master/TD2 **
+a - 911833
+c - 925286
+b - 917257
+controller - 0
+** Average Packets Per Second /Users/ram/Desktop/RAM/Project/fs-master/TD2 **
+a - 724
+c - 733
+b - 727
+controller - 0
+** Average Flows Per Second /Users/ram/Desktop/RAM/Project/fs-master/TD1 **
+a - 4
+c - 2
+b - 4
+controller - 0
+** Average Bytes Per Second /Users/ram/Desktop/RAM/Project/fs-master/TD1 **
+a - 3069234
+c - 3096365
+b - 3068216
+controller - 0
+** Average Packets Per Second /Users/ram/Desktop/RAM/Project/fs-master/TD1 **
+a - 2943
+c - 2968
+b - 2941
+controller - 0
+
+Flows per Second
+--- a
++++ b
+{
+-'a': 47,
++'a': 4,
+-'b': 47,
++'b': 4,
+-'c': 23,
++'c': 2,
+ 'controller': 0,
+}
+
+Bytes per Second
+--- a
++++ b
+{
+-'a': 911833,
++'a': 3069234,
+-'b': 917257,
++'b': 3068216,
+-'c': 925286,
++'c': 3096365,
+ 'controller': 0,
+}
+
+Packets per Second
+--- a
++++ b
+{
+-'a': 724,
++'a': 2943,
+-'b': 727,
++'b': 2941,
+-'c': 733,
++'c': 2968,
+ 'controller': 0,
+}
+
+========== Performance Comparison for flowlets ==========
+** Average Flow Arrival Time /Users/ram/Desktop/RAM/Project/fs-master/TD2 **
+a - 31
+c - 31
+b - 31
+controller - 0
+** Average Flow Departure Time /Users/ram/Desktop/RAM/Project/fs-master/TD2 **
+a - 31
+c - 31
+b - 31
+controller - 0
+** Average Flow Processing Time /Users/ram/Desktop/RAM/Project/fs-master/TD2 **
+a - 0
+c - 0
+b - 0
+controller - 0
+** Average Bytes Per Second /Users/ram/Desktop/RAM/Project/fs-master/TD2 **
+a - 19268
+c - 38599
+b - 19292
+controller - 0
+** Average Packets Per Second /Users/ram/Desktop/RAM/Project/fs-master/TD2 **
+a - 15
+c - 30
+b - 15
+controller - 0
+** Average Flow Arrival Time /Users/ram/Desktop/RAM/Project/fs-master/TD1 **
+a - 31
+c - 31
+b - 31
+controller - 0
+** Average Flow Departure Time /Users/ram/Desktop/RAM/Project/fs-master/TD1 **
+a - 63
+c - 63
+b - 63
+controller - 0
+** Average Flow Processing Time /Users/ram/Desktop/RAM/Project/fs-master/TD1 **
+a - 31
+c - 31
+b - 31
+controller - 0
+** Average Bytes Per Second /Users/ram/Desktop/RAM/Project/fs-master/TD1 **
+a - 622742
+c - 1245486
+b - 622742
+controller - 0
+** Average Packets Per Second /Users/ram/Desktop/RAM/Project/fs-master/TD1 **
+a - 596
+c - 1194
+b - 596
+controller - 0
+
+Flow Arrival Time
+--- a
++++ b
+{
+ 'a': 31,
+ 'b': 31,
+ 'c': 31,
+@@  @@
+}
+
+Flow Departure Time
+--- a
++++ b
+{
+-'a': 31,
++'a': 63,
+-'b': 31,
++'b': 63,
+-'c': 31,
++'c': 63,
+ 'controller': 0,
+}
+
+Flow Processing Time
+--- a
++++ b
+{
+-'a': 0,
++'a': 31,
+-'b': 0,
++'b': 31,
+-'c': 0,
++'c': 31,
+ 'controller': 0,
+}
+
+Bytes per Second
+--- a
++++ b
+{
+-'a': 19268,
++'a': 622742,
+-'b': 19292,
++'b': 622742,
+-'c': 38599,
++'c': 1245486,
+ 'controller': 0,
+}
+
+Packets per Second
+--- a
++++ b
+{
+-'a': 15,
++'a': 596,
+-'b': 15,
++'b': 596,
+-'c': 30,
++'c': 1194,
+ 'controller': 0,
+}
+
+========== Comparison of Rules/Actions ==========
+
+The following rules are different in Config D1 (w.r.t. Config D2):
+
+The following rules are different in Config D2 (w.r.t. Config D1):

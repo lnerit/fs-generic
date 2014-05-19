@@ -1,0 +1,31 @@
+>> To test the debugger as a stand-alone program, run "python pdbTest.py 10 200". To test the debugger with fs, use the following steps.
+
+1. Import the package in the controller code
+	from fsdb import pdb as bp
+
+2. Set a break point at any point in the code using 
+	bp.set_trace()
+  
+>> FSDB has the following capabilities
+
+- Sticky mode
+- Unhide hidden frames
+- Rehide hidden frames
+- Longlist source code during debugging
+- Shortlist source code during debugging
+- Pretty print expressions
+- Recursive debugger
+- Interact interpreter with all variables in scope
+- Track a variable
+- Watch/unwatch variable
+- Access the value of any variable by typing variable name
+- Default GDB options like continue, step, print stack, up, down, frame
+- Edit files during dubugging
+- Extensive post-mortem
+- Enable/disable break points on the fly
+- Trace packet through the network
+- Packet replay feature added
+
+TODO:
+ 
+- Diff capability for pre-/post-config change detection

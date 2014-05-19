@@ -1,0 +1,17 @@
+fsReplay animator is extended from ns animator (NsNam). We modified the code 
+available at "http://www.nsnam.org/docs/release/3.10/manual/html/animation.html".
+
+To build animator:
+  1) Install Qt (v4) library from http://qt-project.org/doc/qt-4.8/installation.html
+  2) qmake fsReplay/NetAnim.pro
+  3) Makefile should be created in the fsReplay directory
+  4) Build with "make"
+  5) Test animator with: ./fsReplay dumbbell.tr
+                            or
+                         ./fsReplay grid.tr
+
+Compile Issues:
+  If make fails, ensure that the qt4 version of qtmake is being used.  If you have 
+  qt4 installed, but can't issue qmake command, it may need to be added to the path, 
+  or simply specify the full path the the executable.
+
