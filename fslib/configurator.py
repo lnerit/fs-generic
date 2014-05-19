@@ -403,7 +403,7 @@ class FsConfigurator(object):
 
     def __check_controller(self, ctype, addr, port):
         ''' basic dummy check at a port
-            TODO: Write something robust - may be telnet telnet'''
+            TODO: Write something robust - may be using telnet'''
         try:
             s = socket(AF_INET, SOCK_STREAM)
             result = s.connect_ex((addr, port))
@@ -436,7 +436,7 @@ class FsConfigurator(object):
             self.logger.debug('Adding node {} type {} config {}'.format(rname,ctype,rdict))
 
             # ctype is the ClassName of the node to construct.
-            # the class may be in fslib.node or fslib.openflow or fslib.proxy
+            # the class may be in fslib.node or fslib.openflow (deprecated) or fslib.proxy
 
             m = import_module("fslib.node")
             cls = getattr(m, ctype, None)
@@ -444,8 +444,8 @@ class FsConfigurator(object):
             if not cls:
                 ## Change zone ##
                 
-                # This is to be deprecated
-                m1 = import_module("fslib.openflow")
+                # This is deprecated
+                # m = import_module("fslib.openflow")
 
                 # FIXME: Enhanced control scan will be added later after deadline
                 # Connect based on controllerType - POX, ODL

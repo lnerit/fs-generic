@@ -12,6 +12,7 @@ from fslib.common import fscore, get_logger
 from fslib.flowlet import Flowlet, FlowIdent
 from fslib.util import default_ip_to_macaddr
 from fslib.configurator import FsConfigurator
+from fslib.openflow import load_pox_component
 
 from pox.openflow import libopenflow_01 as oflib
 import pox.core
@@ -20,7 +21,6 @@ import pox.lib.packet as pktlib
 from pox.lib.util import dpid_to_str
 import pox.openflow.of_01 as ofcore
 from pox.datapaths.switch import SoftwareSwitch
-from fslib.openflow import load_pox_component
 
 class UnhandledPoxPacketFlowletTranslation(Exception):
     pass
@@ -356,6 +356,56 @@ class OpenflowSwitch(Node):
         for p in self.ports:
             self.logger.debug("\tSwitch port {}: {}, {}".format(p, self.ports[p], self.pox_switch.ports[p].show()))
 
+'''
+Old version written by Joel
+
+class OpenflowController(Node):
+    __slots__ = ['components', 'switch_links']
+
+    def __init__(self, name, measurement_config, **kwargs):
+        Node.__init__(self, name, measurement_config, **kwargs)
+        self.components = kwargs.get('components','').split()
+        self.switch_links = {}
+
+    def flowlet_arrival(self, flowlet, prevnode, destnode, input_port="127.0.0.1"):
+        # Handle switch-to-controller incoming messages
+        # assumption: flowlet is an OpenflowMessage
+        assert(isinstance(flowlet,OpenflowMessage))
+        self.switch_links[prevnode][0].simrecv(flowlet.ofmsg) 
+
+    def add_link(self, link, hostip, remoteip, next_node):
+        # don't do much except create queue of switch connections so that we can
+        eventually build ofcore.Connection objects for each one
+        once start() gets called.
+        xconn = ofcore.Connection(-1, self.controller_to_switch, next_node, link.egress_node.dpid)
+        print xconn, ofcore, next_node, link.egress_node.dpid
+        self.switch_links[next_node] = (xconn, link)
+
+    def controller_to_switch(self, switchname, mesg):
+        # Ferry an OF message from controller to switch
+        if not self.started:
+            # self.logger.info("OF controller-to-switch deferred message {}".format(mesg))
+            evid = 'deferred controller->switch send'
+            fscore().after(0, evid, self.controller_to_switch, switchname, mesg)
+        else:
+            # self.logger.info("OF controller-to-switch {}->{}: {}".format(self.name, switchname, mesg))
+            # print("OF controller-to-switch {}->{}: {}".format(self.name, switchname, mesg))
+            link = self.switch_links[switchname][1]
+            link.flowlet_arrival(OpenflowMessage(FlowIdent(), mesg), self.name, switchname)
+       
+    def start(self):
+        # Load POX controller components
+        Node.start(self)
+
+        # remove self from networkx graph (topology)
+        fscore().topology.remove_node(self.name)
+        for component in self.components:
+            self.logger.debug("Starting OF Controller Component {}".format(component))
+'''
+
+''' From the new version OpenflowController class will act as a proxy between
+the controller and the switches. All the messages exchanged between the
+controller and switches are transparent to this class'''
 
 class OpenflowController(Node):
     __slots__ = ['components', 'switch_links']
@@ -376,16 +426,18 @@ class OpenflowController(Node):
         eventually build ofcore.Connection objects for each one
         once start() gets called.'''
         xconn = ofcore.Connection(-1, self.controller_to_switch, next_node, link.egress_node.dpid)
+        print xconn, ofcore, next_node, link.egress_node.dpid
         self.switch_links[next_node] = (xconn, link)
 
     def controller_to_switch(self, switchname, mesg):
         '''Ferry an OF message from controller to switch'''
         if not self.started:
-            # self.logger.debug("OF controller-to-switch deferred message {}".format(mesg))
+            # self.logger.info("OF controller-to-switch deferred message {}".format(mesg))
             evid = 'deferred controller->switch send'
             fscore().after(0, evid, self.controller_to_switch, switchname, mesg)
         else:
-            # self.logger.debug("OF controller-to-switch {}->{}: {}".format(self.name, switchname, mesg))
+            # self.logger.info("OF controller-to-switch {}->{}: {}".format(self.name, switchname, mesg))
+            # print("OF controller-to-switch {}->{}: {}".format(self.name, switchname, mesg))
             link = self.switch_links[switchname][1]
             link.flowlet_arrival(OpenflowMessage(FlowIdent(), mesg), self.name, switchname)
        

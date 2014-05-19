@@ -67,8 +67,8 @@ class PoxLibPlug(object):
         print "Pox library plug get attribute {}".format(attr)
         assert(False),"Unexpected POX call: monkeypatch may need update."
 
-
 origConn = ofcore.Connection
+
 class FakeOpenflowConnection(ofcore.Connection):
     def __init__(self, sock, controller_send, switchname="wrong", dpid=None):
         self.sendfn = controller_send
@@ -91,7 +91,7 @@ class FakeOpenflowConnection(ofcore.Connection):
     def simrecv(self, msg):
         # print "Received message in FakeOpenflowConnection:", str(msg)
         if msg.version != oflib.OFP_VERSION:
-            log.warning("Bad OpenFlow version (0x%02x) on connection %s"
+            get_logger().debug("Bad OpenFlow version (0x%02x) on connection %s"
                 % (ord(self.buf[offset]), self))
             return False # Throw connection away
 
@@ -104,7 +104,7 @@ class FakeOpenflowConnection(ofcore.Connection):
             h = handlers[ofp_type]
             h(self, msg)
         except:
-            log.exception("%s: Exception while handling OpenFlow message:\n" +
+            get_logger().debug("%s: Exception while handling OpenFlow message:\n" +
                       "%s %s", self,self,
                       ("\n" + str(self) + " ").join(str(msg).split('\n')))
         return True
@@ -173,8 +173,6 @@ def load_pox_component(name):
         log.error("Error trying to import {} POX component".format(name))
         raise RuntimeError(str(e))
 
-## TODO: Remove all these -- no patching
-# print "MP happens here? 2"
 monkey_patch_pox()
 load_pox_component("pox.openflow")
 # get_logger().info("Kicking POX Up")

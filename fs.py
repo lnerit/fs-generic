@@ -46,9 +46,6 @@ class FsCore(object):
         '''Callback for printing simulation timeline progress'''
         complete = (self.now - self.starttime) / float(self.endtime)
 
-	# Debugger can be set inside simulator's code too :-)
-	# bp.set_trace()
-
         self.logger.info('simulation completion: %2.2f' % (complete))
         self.after(self.endtime*self.progtick, 
             'progress indicator', self.progress)
@@ -134,7 +131,6 @@ class FsCore(object):
             return
 
         self.after(0.0, 'progress indicator', self.progress)
-
         simstart = self.__now
         self.topology.start()
         while (self.__now - simstart) < self.endtime and not self.intr:
@@ -149,7 +145,6 @@ class FsCore(object):
         self.logger.debug("Reached simulation end time: {}, {}"
                 .format(self.now, self.endtime))
         self.topology.stop()
-
 
 def main():
     '''Parse command-line arguments and start up the simulation'''
