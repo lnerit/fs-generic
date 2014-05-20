@@ -421,6 +421,7 @@ class OpenflowController(Node):
     def flowlet_arrival(self, flowlet, prevnode, destnode, input_port="127.0.0.1"):
         '''Handle switch-to-controller incoming messages'''
         # assumption: flowlet is an OpenflowMessage
+        print "seq 2"
         assert(isinstance(flowlet,OpenflowMessage))
         self.switch_links[prevnode][0].simrecv(flowlet.ofmsg) 
 
@@ -431,7 +432,7 @@ class OpenflowController(Node):
         xconn = ofcore.Connection(-1, self.controller_to_switch, next_node, link.egress_node.dpid)
         # print xconn, ofcore, next_node, link.egress_node.dpid
         self.switch_links[next_node] = (xconn, link)
-        print self.switch_links[next_node]
+        # print self.switch_links[next_node]
 
     def controller_to_switch(self, switchname, mesg):
         '''Ferry an OF message from controller to switch'''
@@ -443,6 +444,7 @@ class OpenflowController(Node):
             # self.logger.info("OF controller-to-switch {}->{}: {}".format(self.name, switchname, mesg))
             # print("OF controller-to-switch {}->{}: {}".format(self.name, switchname, mesg))
             link = self.switch_links[switchname][1]
+            print "seq 1"
             link.flowlet_arrival(OpenflowMessage(FlowIdent(), mesg), self.name, switchname)
        
     def start(self):

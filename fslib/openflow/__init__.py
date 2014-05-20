@@ -20,6 +20,7 @@ if 'initialize' in dir(pox.core):
 from pox.openflow import libopenflow_01 as oflib
 import pox.openflow as openflow_component
 import pox.openflow.of_01 as ofcore
+import pox.openflow.of_01 as ofcore_gen
 
 class RuntimeError(Exception):
     pass
@@ -67,22 +68,33 @@ class PoxLibPlug(object):
         print "Pox library plug get attribute {}".format(attr)
         assert(False),"Unexpected POX call: monkeypatch may need update."
 
-origConn = ofcore.Connection
+'''
+## Change zone
+Change this connection to remote controller
+'''
 
-class FakeOpenflowConnection(ofcore.Connection):
+# print "bla1"
+# origConn = ofcore.Connection
+origConn_gen = ofcore_gen.Connection
+# print "bla2"
+
+class GenOpenflowConnection(ofcore_gen.Connection):
     def __init__(self, sock, controller_send, switchname="wrong", dpid=None):
         self.sendfn = controller_send
         self.idle_time = None
         self.connect_time = None
         self.switchname = switchname
         self.sock = -1
-        origConn.__init__(self, -1) 
+        print "Connection init"
+        origConn_gen.__init__(self, -1)
+        print "After connection init"
         self.ofnexus = pox.core.core.OpenFlowConnectionArbiter.getNexus(self)
         self.dpid = dpid
         self.ofnexus.connections[dpid] = self
                 
     def send(self, ofmessage):
-        get_logger().debug("Doing callback in OF connection from controller->switch {}".format(ofmessage)) 
+        get_logger().info("Doing callback in OF connection from controller->switch {}".format(ofmessage)) 
+        print "unknown", self.switchname
         self.sendfn(self.switchname, ofmessage)
 
     def read(self):
@@ -90,6 +102,7 @@ class FakeOpenflowConnection(ofcore.Connection):
 
     def simrecv(self, msg):
         # print "Received message in FakeOpenflowConnection:", str(msg)
+        print "seq 3"
         if msg.version != oflib.OFP_VERSION:
             get_logger().debug("Bad OpenFlow version (0x%02x) on connection %s"
                 % (ord(self.buf[offset]), self))
@@ -115,6 +128,61 @@ class FakeOpenflowConnection(ofcore.Connection):
     def close(self):
         pass
 
+'''
+Original function written by Joel
+
+class FakeOpenflowConnection(ofcore.Connection):
+    def __init__(self, sock, controller_send, switchname="wrong", dpid=None):
+        self.sendfn = controller_send
+        self.idle_time = None
+        self.connect_time = None
+        self.switchname = switchname
+        self.sock = -1
+        print "Connection init"
+        origConn.__init__(self, -1) 
+        origConn.__init__(self, -1)
+        print "After connection init"
+        self.ofnexus = pox.core.core.OpenFlowConnectionArbiter.getNexus(self)
+        self.dpid = dpid
+        self.ofnexus.connections[dpid] = self
+                
+    def send(self, ofmessage):
+        get_logger().debug("Doing callback in OF connection from controller->switch {}".format(ofmessage)) 
+        print "unknown", self.switchname
+        self.sendfn(self.switchname, ofmessage)
+
+    def read(self):
+        print "Got read() in Fake Connection, but we expect simrecv to be called"
+
+    def simrecv(self, msg):
+        # print "Received message in FakeOpenflowConnection:", str(msg)
+        print "seq 3"
+        if msg.version != oflib.OFP_VERSION:
+            get_logger().debug("Bad OpenFlow version (0x%02x) on connection %s"
+                % (ord(self.buf[offset]), self))
+            return False # Throw connection away
+
+        # don't need to pack/unpack because we control message send/recv
+        # new_offset,msg = unpackers[ofp_type](self.buf, offset)
+        ofp_type = msg.header_type
+
+        try:
+            from pox.openflow.of_01 import handlers
+            h = handlers[ofp_type]
+            h(self, msg)
+        except:
+            get_logger().debug("%s: Exception while handling OpenFlow message:\n" +
+                      "%s %s", self,self,
+                      ("\n" + str(self) + " ").join(str(msg).split('\n')))
+        return True
+
+    def fileno(self):
+        return -1
+
+    def close(self):
+        pass
+'''
+
 def get_pox_logger(*args, **kwargs):
     return get_logger()
 
@@ -123,7 +191,8 @@ def monkey_patch_pox():
     the openflow connection class.  Other overrides are mainly to ensure
     that nothing unexpected happens, but are strictly not necessary at
     present (using betta branch of POX)'''
-    get_logger().info("Monkeypatching POX for integration with fs")
+    # get_logger().info("Monkeypatching POX for integration with fs")
+    get_logger().info("Controller integration with fs")
 
     fakerlib = PoxLibPlug()
     import pox.lib.recoco as recoco
@@ -138,8 +207,11 @@ def monkey_patch_pox():
     setattr(pox, "messenger", fakerlib)
     setattr(pox, "misc", fakerlib)
 
-    setattr(ofcore, "Connection", FakeOpenflowConnection)
-    setattr(ofcore, "OpenFlow_01_Task", fakerlib)
+    # setattr(ofcore, "Connection", FakeOpenflowConnection)
+    # setattr(ofcore, "OpenFlow_01_Task", fakerlib)
+
+    setattr(ofcore_gen, "Connection", GenOpenflowConnection)
+    setattr(ofcore_gen, "OpenFlow_01_Task", fakerlib)
 
     import pox.core 
     setattr(pox.core, "getLogger", get_pox_logger)
