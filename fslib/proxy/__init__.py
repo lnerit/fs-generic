@@ -407,7 +407,8 @@ class OpenflowController(Node):
 ''' 
 From the new version OpenflowController class will act as a proxy between
 the controller and the switches. All the messages exchanged between the
-controller and switches are transparent to this class
+controller and switches are transparent to this class. This will be central
+layer between a *real* controller and switches in fs
 '''
 
 class OpenflowController(Node):
@@ -421,7 +422,7 @@ class OpenflowController(Node):
     def flowlet_arrival(self, flowlet, prevnode, destnode, input_port="127.0.0.1"):
         '''Handle switch-to-controller incoming messages'''
         # assumption: flowlet is an OpenflowMessage
-        print "seq 2"
+        # print "seq 2"
         assert(isinstance(flowlet,OpenflowMessage))
         self.switch_links[prevnode][0].simrecv(flowlet.ofmsg) 
 
@@ -444,7 +445,7 @@ class OpenflowController(Node):
             # self.logger.info("OF controller-to-switch {}->{}: {}".format(self.name, switchname, mesg))
             # print("OF controller-to-switch {}->{}: {}".format(self.name, switchname, mesg))
             link = self.switch_links[switchname][1]
-            print "seq 1"
+            # print "seq 1"
             link.flowlet_arrival(OpenflowMessage(FlowIdent(), mesg), self.name, switchname)
        
     def start(self):
@@ -453,6 +454,10 @@ class OpenflowController(Node):
 
         # remove self from networkx graph (topology)
         fscore().topology.remove_node(self.name)
+
+        # this does nothing ????
+        '''
         for component in self.components:
             self.logger.debug("Starting OF Controller Component {}".format(component))
             load_pox_component(component)
+        '''

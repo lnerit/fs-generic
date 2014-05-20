@@ -5,17 +5,20 @@
 # version 2: direct integration and monkeypatching of POX
 
 ## Change zone ##
-# version 3: this file is deprecated and monkeypatching is not used anymore
+# version 3: most of the logic here is deprecated and monkeypatching is not used anymore
 
 from fslib.common import fscore, get_logger
 from fslib.node import Node
 from importlib import import_module
 
+# print "remove1"
 import pox
+'''
 import pox.core
-
 if 'initialize' in dir(pox.core):
     pox.core.initialize()
+'''
+# print "remove2"
 
 from pox.openflow import libopenflow_01 as oflib
 import pox.openflow as openflow_component
@@ -85,16 +88,16 @@ class GenOpenflowConnection(ofcore_gen.Connection):
         self.connect_time = None
         self.switchname = switchname
         self.sock = -1
-        print "Connection init"
+        # print "Connection init"
         origConn_gen.__init__(self, -1)
-        print "After connection init"
+        # print "After connection init"
         self.ofnexus = pox.core.core.OpenFlowConnectionArbiter.getNexus(self)
         self.dpid = dpid
         self.ofnexus.connections[dpid] = self
                 
     def send(self, ofmessage):
-        get_logger().info("Doing callback in OF connection from controller->switch {}".format(ofmessage)) 
-        print "unknown", self.switchname
+        get_logger().debug("Doing callback in OF connection from controller->switch {}".format(ofmessage)) 
+        # print "unknown", self.switchname
         self.sendfn(self.switchname, ofmessage)
 
     def read(self):
@@ -102,7 +105,7 @@ class GenOpenflowConnection(ofcore_gen.Connection):
 
     def simrecv(self, msg):
         # print "Received message in FakeOpenflowConnection:", str(msg)
-        print "seq 3"
+        # print "seq 3"
         if msg.version != oflib.OFP_VERSION:
             get_logger().debug("Bad OpenFlow version (0x%02x) on connection %s"
                 % (ord(self.buf[offset]), self))
@@ -221,7 +224,6 @@ def load_pox_component(name):
     '''Load a pox component by trying to import the named module and
        invoking launch().  Raise a runtime error if something goes wrong.'''
 
-    # print "MP happens here? 3"
     log = get_logger()
     try:
         m = import_module(name)
