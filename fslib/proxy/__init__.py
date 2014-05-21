@@ -12,6 +12,7 @@ from fslib.common import fscore, get_logger
 from fslib.flowlet import Flowlet, FlowIdent
 from fslib.util import default_ip_to_macaddr
 from fslib.configurator import FsConfigurator
+
 from fslib.openflow import load_pox_component
 
 from pox.openflow import libopenflow_01 as oflib
@@ -412,11 +413,14 @@ layer between a *real* controller and switches in fs
 '''
 
 class OpenflowController(Node):
-    __slots__ = ['components', 'switch_links']
+    __slots__ = ['components', 'switch_links', 'conType', 'conAddr', 'conPort']
 
     def __init__(self, name, measurement_config, **kwargs):
         Node.__init__(self, name, measurement_config, **kwargs)
         self.components = kwargs.get('components','').split()
+        self.conType = kwargs.get('conType')
+        self.conAddr = kwargs.get('conAddr')
+        self.conPort = eval(kwargs.get('conPort'))
         self.switch_links = {}
 
     def flowlet_arrival(self, flowlet, prevnode, destnode, input_port="127.0.0.1"):
@@ -455,9 +459,13 @@ class OpenflowController(Node):
         # remove self from networkx graph (topology)
         fscore().topology.remove_node(self.name)
 
-        # this does nothing ????
+        # this does nothing ???? So, commenting this...
         '''
         for component in self.components:
             self.logger.debug("Starting OF Controller Component {}".format(component))
             load_pox_component(component)
         '''
+        # Check the type of controller and patch based on that...
+        # don't do fake connection
+        self.logger.info("Connecting to {} at {}:{}".format(self.conType, self.conAddr, self.conPort))
+

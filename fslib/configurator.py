@@ -453,25 +453,38 @@ class FsConfigurator(object):
                 # OpenDaylight runs in 127.0.0.1:6633
                 # Do a conditional wait until controllers are started
                 # Only when the controllers are running, start the simulation
-                
+               
+                # Default values to be used if none specified in config file
+                # Uncomment to use defaults
+                '''
                 conType = 'ODL' # or 'POX'
                 conAddr = '127.0.0.1'
                 conPort = 6633
                 timeOut = 120 # two minutes to timeout the conditional wait
                 pollPeriod = 10 # poll once every 10 seconds
+                '''
 
-                if conType == 'POX' or conType == 'ODL':
-                    if ctype == 'OpenflowController':
-                        self.logger.debug('Controller')
+                # FIXME: point to patch controller key bits later
+
+                if ctype == 'OpenflowController':
+                    self.logger.debug('Controller')
+                    conType = rdict.get('conType')
+                    conAddr = rdict.get('conAddr')
+                    conPort = eval(rdict.get('conPort'))
+                    timeOut = eval(rdict.get('timeOut'))
+                    pollPeriod = eval(rdict.get('pollPeriod'))
+                   
+                    # extend this when adding more contollers are supported
+                    if conType == 'POX' or conType == 'ODL':
                         # no point in running simulations with controllers
                         self.__wait_until_controller(conType, conAddr, conPort,\
-                                                 timeOut, pollPeriod)
-                    elif ctype == 'OpenflowSwitch':
-                        self.logger.debug('Switch')
+                                                     timeOut, pollPeriod)
                     else:
-                        raise Exception('Invalid OF Component')
+                        raise Exception('Other controller types not supported!')
+                elif ctype == 'OpenflowSwitch':
+                    self.logger.debug('Switch')
                 else:
-                    raise Exception('Other controller types not supported!')
+                    raise Exception('Invalid OF Component')
                 
                 m = import_module("fslib.proxy")
                 cls = getattr(m, ctype, None)

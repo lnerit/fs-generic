@@ -1,3 +1,4 @@
+//Config file to connect to VM running 5 controllers (OpenDaylight, Floodlight, Trema, POX, and Ryu)
 graph test {
     // global settings for measurements
     counterexportfile="counters"
@@ -41,8 +42,8 @@ graph test {
     controller [
         type="OpenflowController"
 	    components="pox.forwarding.l2_learning"
-        conType="ODL" // or POX
-        conAddr="127.0.0.1"
+        conType="POX" // or "ODL" 
+        conAddr="192.168.56.102"
         conPort=6633
         timeOut=120
         pollPeriod=10

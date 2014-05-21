@@ -65,7 +65,6 @@ class FakePoxTimer(object):
         if rv and self._recurring:
             fscore().after(self._timeToWake, self.id, self.docallback, None)
         
-
 class PoxLibPlug(object):
     def __getattr__(self, attr):
         print "Pox library plug get attribute {}".format(attr)
@@ -194,8 +193,8 @@ def monkey_patch_pox():
     the openflow connection class.  Other overrides are mainly to ensure
     that nothing unexpected happens, but are strictly not necessary at
     present (using betta branch of POX)'''
-    # get_logger().info("Monkeypatching POX for integration with fs")
-    get_logger().info("Controller integration with fs")
+    get_logger().info("Monkeypatching POX for integration with fs")
+    # get_logger().info("Controller integration with fs")
 
     fakerlib = PoxLibPlug()
     import pox.lib.recoco as recoco
@@ -247,11 +246,16 @@ def load_pox_component(name):
         log.error("Error trying to import {} POX component".format(name))
         raise RuntimeError(str(e))
 
+# Move this to proxy to help patching of pox
+# Take action based on controller type
 monkey_patch_pox()
 load_pox_component("pox.openflow")
+
+# Not needed for version 2 or 3 of fs-sdn
 # get_logger().info("Kicking POX Up")
 # pox.core.core.goUp()
-get_logger().debug("POX components: {}".format(pox.core.core.components))
+
+# get_logger().debug("POX components: {}".format(pox.core.core.components))
 # print "MP - 5"
-from pox_bridge import *
+# from pox_bridge import *
 # print "MP - 6"
