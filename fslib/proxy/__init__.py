@@ -5,6 +5,7 @@ import logging
 from ipaddr import IPv4Address
 from struct import pack as spack
 from pytricia import PyTricia
+import socket
 
 from fslib.node import Node, PortInfo
 from fslib.link import NullLink
@@ -413,7 +414,7 @@ layer between a *real* controller and switches in fs
 '''
 
 class OpenflowController(Node):
-    __slots__ = ['components', 'switch_links', 'conType', 'conAddr', 'conPort']
+    __slots__ = ['components', 'switch_links', 'conType', 'conAddr', 'conPort', 'socket', 'conTimeOut']
 
     def __init__(self, name, measurement_config, **kwargs):
         Node.__init__(self, name, measurement_config, **kwargs)
@@ -421,7 +422,9 @@ class OpenflowController(Node):
         self.conType = kwargs.get('conType')
         self.conAddr = kwargs.get('conAddr')
         self.conPort = eval(kwargs.get('conPort'))
+        self.conTimeOut = eval(kwargs.get('conTimeOut'))
         self.switch_links = {}
+        self.socket = socket.create_connection((self.conAddr,self.conPort),timeout = self.conTimeOut)
 
     def flowlet_arrival(self, flowlet, prevnode, destnode, input_port="127.0.0.1"):
         '''Handle switch-to-controller incoming messages'''
@@ -434,13 +437,15 @@ class OpenflowController(Node):
         '''don't do much except create queue of switch connections so that we can
         eventually build ofcore.Connection objects for each one
         once start() gets called.'''
-        xconn = ofcore.Connection(-1, self.controller_to_switch, next_node, link.egress_node.dpid)
-        # print xconn, ofcore, next_node, link.egress_node.dpid
+        # print ofcore, self.controller_to_switch, next_node, link.egress_node.dpid
+
+        # No more fake connection, talk to real controller using self.socket
+        # xconn = ofcore.Connection(-1, self.controller_to_switch, next_node, link.egress_node.dpid)
+        xconn = ofcore.Connection(self.socket, self.controller_to_switch, next_node, link.egress_node.dpid)
         self.switch_links[next_node] = (xconn, link)
-        # print self.switch_links[next_node]
 
     def controller_to_switch(self, switchname, mesg):
-        '''Ferry an OF message from controller to switch'''
+        '''Ferry an OF message from controller proxy to switch'''
         if not self.started:
             # self.logger.info("OF controller-to-switch deferred message {}".format(mesg))
             evid = 'deferred controller->switch send'
@@ -451,6 +456,7 @@ class OpenflowController(Node):
             link = self.switch_links[switchname][1]
             # print "seq 1"
             link.flowlet_arrival(OpenflowMessage(FlowIdent(), mesg), self.name, switchname)
+            # print('Message:{}, Name: {}, Switch: {}'.format(mesg, self.name, switchname))
        
     def start(self):
         '''Load POX controller components'''
@@ -459,13 +465,16 @@ class OpenflowController(Node):
         # remove self from networkx graph (topology)
         fscore().topology.remove_node(self.name)
 
-        # this does nothing ???? So, commenting this...
-        '''
         for component in self.components:
             self.logger.debug("Starting OF Controller Component {}".format(component))
             load_pox_component(component)
-        '''
-        # Check the type of controller and patch based on that...
-        # don't do fake connection
-        self.logger.info("Connecting to {} at {}:{}".format(self.conType, self.conAddr, self.conPort))
 
+        # FIXME: Check the type of controller and patch based on that...
+        # Eventhought it works for pox, it will be difficult for ODL
+        if self.conType == 'POX':
+            self.logger.info('Patching POX integration with fs')
+        elif self.conType == 'ODL':
+            self.logger.info('Patching ODL integration with fs')
+
+        # connect to original controller and don't do fake connection
+        self.logger.info("Contacting {} controller at {}:{}".format(self.conType, self.conAddr, self.conPort))

@@ -465,9 +465,8 @@ class FsConfigurator(object):
                 '''
 
                 # FIXME: point to patch controller key bits later
-
                 if ctype == 'OpenflowController':
-                    self.logger.debug('Controller')
+                    self.logger.debug('OF Controller component')
                     conType = rdict.get('conType')
                     conAddr = rdict.get('conAddr')
                     conPort = eval(rdict.get('conPort'))
@@ -482,10 +481,10 @@ class FsConfigurator(object):
                     else:
                         raise Exception('Other controller types not supported!')
                 elif ctype == 'OpenflowSwitch':
-                    self.logger.debug('Switch')
+                    self.logger.debug('OF Switch component')
                 else:
                     raise Exception('Invalid OF Component')
-                
+
                 m = import_module("fslib.proxy")
                 cls = getattr(m, ctype, None)
                 if not cls:

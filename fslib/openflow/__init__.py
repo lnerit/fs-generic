@@ -10,7 +10,7 @@
 from fslib.common import fscore, get_logger
 from fslib.node import Node
 from importlib import import_module
-
+import socket
 # print "remove1"
 import pox
 '''
@@ -75,10 +75,10 @@ class PoxLibPlug(object):
 Change this connection to remote controller
 '''
 
-# print "bla1"
+# print "change1"
 # origConn = ofcore.Connection
 origConn_gen = ofcore_gen.Connection
-# print "bla2"
+# print "change2"
 
 class GenOpenflowConnection(ofcore_gen.Connection):
     def __init__(self, sock, controller_send, switchname="wrong", dpid=None):
@@ -86,10 +86,18 @@ class GenOpenflowConnection(ofcore_gen.Connection):
         self.idle_time = None
         self.connect_time = None
         self.switchname = switchname
-        self.sock = -1
-        # print "Connection init"
-        origConn_gen.__init__(self, -1)
-        # print "After connection init"
+
+        ## change zone ##
+        # Get connected to original controller instead of fake controller
+        # self.sock = -1
+        # origConn.__init__(self, -1)
+        
+        # test connect to local socket for controller -- works
+        # self.sock = socket.create_connection(('127.0.0.1',6633), timeout=120)
+
+        self.sock = sock
+        origConn_gen.__init__(self, self.sock)
+
         self.ofnexus = pox.core.core.OpenFlowConnectionArbiter.getNexus(self)
         self.dpid = dpid
         self.ofnexus.connections[dpid] = self
@@ -193,7 +201,7 @@ def monkey_patch_pox():
     the openflow connection class.  Other overrides are mainly to ensure
     that nothing unexpected happens, but are strictly not necessary at
     present (using betta branch of POX)'''
-    get_logger().info("Monkeypatching POX for integration with fs")
+    # get_logger().info("Monkeypatching POX for integration with fs")
     # get_logger().info("Controller integration with fs")
 
     fakerlib = PoxLibPlug()
