@@ -465,16 +465,14 @@ class OpenflowController(Node):
         # remove self from networkx graph (topology)
         fscore().topology.remove_node(self.name)
 
-        for component in self.components:
-            self.logger.debug("Starting OF Controller Component {}".format(component))
-            load_pox_component(component)
-
         # FIXME: Check the type of controller and patch based on that...
         # Eventhought it works for pox, it will be difficult for ODL
         if self.conType == 'POX':
             self.logger.info('Patching POX integration with fs')
+            for component in self.components:
+                self.logger.debug("Starting OF Controller Component {}".format(component))
+                load_pox_component(component)
         elif self.conType == 'ODL':
             self.logger.info('Patching ODL integration with fs')
-
-        # connect to original controller and don't do fake connection
-        self.logger.info("Contacting {} controller at {}:{}".format(self.conType, self.conAddr, self.conPort))
+        else:
+            raise Exception('Other controller types not supported as of now.')
