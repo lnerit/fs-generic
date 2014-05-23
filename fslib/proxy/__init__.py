@@ -157,7 +157,7 @@ class OpenflowSwitch(Node):
         self.controller_links = {}
         self.interface_to_port_map = {}
         self.trace = bool(eval(kwargs.get('trace', 'False')))
-	self.tracePkt = bool(eval(kwargs.get('tracePkt','False')))
+        self.tracePkt = bool(eval(kwargs.get('tracePkt','False')))
 
         self.ipdests = PyTricia()
         for prefix in kwargs.get('ipdests','').split():
@@ -414,7 +414,7 @@ layer between a *real* controller and switches in fs
 '''
 
 class OpenflowController(Node):
-    __slots__ = ['components', 'switch_links', 'conType', 'conAddr', 'conPort', 'socket', 'conTimeOut']
+    __slots__ = ['components', 'switch_links', 'conType', 'conAddr', 'conPort', 'socket', 'conTimeOut', 'tracePkt']
 
     def __init__(self, name, measurement_config, **kwargs):
         Node.__init__(self, name, measurement_config, **kwargs)
@@ -425,12 +425,32 @@ class OpenflowController(Node):
         self.conTimeOut = eval(kwargs.get('conTimeOut'))
         self.switch_links = {}
         self.socket = socket.create_connection((self.conAddr,self.conPort),timeout = self.conTimeOut)
+        self.tracePkt = bool(eval(kwargs.get('tracePkt','False')))
+
+    def packet_in_debugger(self, flowlet, prevnode, destnode, input_port):
+        ''' Packet trace logic to trace at the flowlet level '''
+        # Wrote this way because it will be easier to extend this to a replay capability
+        input_port = None
+        table_entry = 'No match'
+        actions = None
+        printString = None
+        # table_entry = self.pox_switch.table.entry_for_packet(flowlet.origpkt, input_port)
+        if isinstance(flowlet, OpenflowMessage):
+            printString = "'{}' to '{}'.".format(prevnode, destnode)
+
+
+        self.logger.info(printString)
+        # from fsdb import pdb as bp
+        # bp.set_trace()
 
     def flowlet_arrival(self, flowlet, prevnode, destnode, input_port="127.0.0.1"):
         '''Handle switch-to-controller incoming messages'''
         # assumption: flowlet is an OpenflowMessage
         # print "seq 2"
         assert(isinstance(flowlet,OpenflowMessage))
+        if self.tracePkt:
+            self.packet_in_debugger(flowlet, prevnode, destnode, input_port)
+
         self.switch_links[prevnode][0].simrecv(flowlet.ofmsg) 
 
     def add_link(self, link, hostip, remoteip, next_node):

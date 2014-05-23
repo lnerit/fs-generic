@@ -16,7 +16,6 @@ graph test {
         autoack="False"
         ipdests="10.1.0.0/16"
         traffic="m1"
-	// tracePkt="True"
         // udp vbr flows 
         m1="modulator start=5 generator=s1 profile=((3600,),(5,))"
         s1="simple ipsrc=10.1.1.0/24 ipdst=10.3.1.0/24 flowlets=1 dport=randomunifint(1024,65535) sport=randomunifint(1024,65535) ipproto=udp pkts=normal(600,10) bytes=normal(625000,100) continuous=True fps=1"
@@ -27,7 +26,6 @@ graph test {
         controller="controller"
         autoack="False"
         ipdests="10.2.0.0/16" 
-	// tracePkt="True"
     ];
 
     c [ 
@@ -35,7 +33,6 @@ graph test {
         controller="controller"
         autoack="False"
         ipdests="10.3.0.0/16 10.4.0.0/16 10.0.0.0/8" 
-	// tracePkt="True"
     ];
 
     controller [
@@ -47,6 +44,7 @@ graph test {
         conTimeOut=120
         timeOut=120
         pollPeriod=10
+	    //tracePkt="True"
     ];
 
 

@@ -5,7 +5,7 @@
 # version 2: direct integration and monkeypatching of POX
 
 ## Change zone ##
-# version 3: most of the logic here is deprecated and monkeypatching is not used anymore
+# version 3: most of the logic here is deprecated and monkeypatching is used minimally
 
 from fslib.common import fscore, get_logger
 from fslib.node import Node
@@ -22,7 +22,7 @@ if 'initialize' in dir(pox.core):
 
 from pox.openflow import libopenflow_01 as oflib
 import pox.openflow as openflow_component
-import pox.openflow.of_01 as ofcore
+# import pox.openflow.of_01 as ofcore
 import pox.openflow.of_01 as ofcore_gen
 
 class RuntimeError(Exception):
