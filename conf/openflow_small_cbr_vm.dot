@@ -42,12 +42,13 @@ graph test {
     controller [
         type="OpenflowController"
 	    components="pox.forwarding.l2_learning"
-        conType="ODL" // or "ODL" 
+        conType="POX" // or "ODL" 
         conAddr="192.168.56.102"
         conPort=6633
         conTimeOut=120
         timeOut=120
         pollPeriod=10
+        //tracePkt="True"
     ];
 
 

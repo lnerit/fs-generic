@@ -11,15 +11,12 @@ from fslib.common import fscore, get_logger
 from fslib.node import Node
 from importlib import import_module
 import socket
-# print "remove1"
 import pox
 '''
 import pox.core
 if 'initialize' in dir(pox.core):
     pox.core.initialize()
 '''
-# print "remove2"
-
 from pox.openflow import libopenflow_01 as oflib
 import pox.openflow as openflow_component
 # import pox.openflow.of_01 as ofcore
@@ -75,10 +72,8 @@ class PoxLibPlug(object):
 Change this connection to remote controller
 '''
 
-# print "change1"
 # origConn = ofcore.Connection
 origConn_gen = ofcore_gen.Connection
-# print "change2"
 
 class GenOpenflowConnection(ofcore_gen.Connection):
     def __init__(self, sock, controller_send, switchname="wrong", dpid=None):
@@ -148,10 +143,7 @@ class FakeOpenflowConnection(ofcore.Connection):
         self.connect_time = None
         self.switchname = switchname
         self.sock = -1
-        print "Connection init"
-        origConn.__init__(self, -1) 
         origConn.__init__(self, -1)
-        print "After connection init"
         self.ofnexus = pox.core.core.OpenFlowConnectionArbiter.getNexus(self)
         self.dpid = dpid
         self.ofnexus.connections[dpid] = self
@@ -201,8 +193,6 @@ def monkey_patch_pox():
     the openflow connection class.  Other overrides are mainly to ensure
     that nothing unexpected happens, but are strictly not necessary at
     present (using betta branch of POX)'''
-    # get_logger().info("Monkeypatching POX for integration with fs")
-    # get_logger().info("Controller integration with fs")
 
     fakerlib = PoxLibPlug()
     import pox.lib.recoco as recoco

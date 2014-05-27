@@ -139,6 +139,12 @@ class PoxBridgeSoftwareSwitch(SoftwareSwitch):
     def set_output_packet_callback(self, fn):
         self.forward = fn
 
+    # start here
+    '''
+    def _get_table_entry(self, dpid):
+        print self.pox_switch
+    '''
+
 class OpenflowSwitch(Node):
     __slots__ = ['dpid', 'pox_switch', 'controller_name', 'controller_links', 'ipdests', 
                  'interface_to_port_map', 'trafgen_ip', 'autoack', 'trafgen_mac', 'dstmac_cache',
@@ -424,7 +430,10 @@ class OpenflowController(Node):
         self.conPort = eval(kwargs.get('conPort'))
         self.conTimeOut = eval(kwargs.get('conTimeOut'))
         self.switch_links = {}
-        self.socket = socket.create_connection((self.conAddr,self.conPort),timeout = self.conTimeOut)
+        try:
+            self.socket = socket.create_connection((self.conAddr,self.conPort),timeout = self.conTimeOut)
+        except:
+            raise Exception('Cannot create connection!')
         self.tracePkt = bool(eval(kwargs.get('tracePkt','False')))
 
     def packet_in_debugger(self, flowlet, prevnode, destnode, input_port):
@@ -461,7 +470,10 @@ class OpenflowController(Node):
 
         # No more fake connection, talk to real controller using self.socket
         # xconn = ofcore.Connection(-1, self.controller_to_switch, next_node, link.egress_node.dpid)
-        xconn = ofcore.Connection(self.socket, self.controller_to_switch, next_node, link.egress_node.dpid)
+        try:
+            xconn = ofcore.Connection(self.socket, self.controller_to_switch, next_node, link.egress_node.dpid)
+        except:
+            raise Exception('Success creating socket. Cannot establish links!')
         self.switch_links[next_node] = (xconn, link)
 
     def controller_to_switch(self, switchname, mesg):
