@@ -1,5 +1,6 @@
 # simple local run
-python -OO fs.py -t 60 conf/openflow_small_cbr.dot
+# python -OO fs.py -t 60 conf/openflow_small_cbr.dot
+python -OO fs.py -t 180 conf/openflow_small_cbr.dot
 
 # For running with five controllers in VM
 # python -OO fs.py -t 60 conf/openflow_small_cbr_vm.dot

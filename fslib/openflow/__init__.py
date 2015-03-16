@@ -74,6 +74,7 @@ Change this connection to remote controller
 
 # origConn = ofcore.Connection
 origConn_gen = ofcore_gen.Connection
+controller = ''
 
 class GenOpenflowConnection(ofcore_gen.Connection):
     def __init__(self, sock, controller_send, switchname="wrong", dpid=None):
@@ -81,7 +82,7 @@ class GenOpenflowConnection(ofcore_gen.Connection):
         self.idle_time = None
         self.connect_time = None
         self.switchname = switchname
-
+        
         ## change zone ##
         # Get connected to original controller instead of fake controller
         # self.sock = -1
@@ -244,8 +245,13 @@ def load_pox_component(name):
         log.error("Error trying to import {} POX component".format(name))
         raise RuntimeError(str(e))
 
+def load_odl_component(name):
+    '''Do nothing for now'''
+    print name
+
 # Move this to proxy to help patching of pox
 # Take action based on controller type
+
 monkey_patch_pox()
 load_pox_component("pox.openflow")
 

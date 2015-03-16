@@ -14,7 +14,7 @@ from fslib.flowlet import Flowlet, FlowIdent
 from fslib.util import default_ip_to_macaddr
 from fslib.configurator import FsConfigurator
 
-from fslib.openflow import load_pox_component
+from fslib.openflow import load_pox_component, load_odl_component
 
 from pox.openflow import libopenflow_01 as oflib
 import pox.core
@@ -447,7 +447,6 @@ class OpenflowController(Node):
         if isinstance(flowlet, OpenflowMessage):
             printString = "'{}' to '{}'.".format(prevnode, destnode)
 
-
         self.logger.info(printString)
         # from fsdb import pdb as bp
         # bp.set_trace()
@@ -459,7 +458,6 @@ class OpenflowController(Node):
         assert(isinstance(flowlet,OpenflowMessage))
         if self.tracePkt:
             self.packet_in_debugger(flowlet, prevnode, destnode, input_port)
-
         self.switch_links[prevnode][0].simrecv(flowlet.ofmsg) 
 
     def add_link(self, link, hostip, remoteip, next_node):
@@ -489,7 +487,7 @@ class OpenflowController(Node):
             # print "seq 1"
             link.flowlet_arrival(OpenflowMessage(FlowIdent(), mesg), self.name, switchname)
             # print('Message:{}, Name: {}, Switch: {}'.format(mesg, self.name, switchname))
-       
+      
     def start(self):
         '''Load POX controller components'''
         Node.start(self)
@@ -499,12 +497,15 @@ class OpenflowController(Node):
 
         # FIXME: Check the type of controller and patch based on that...
         # Eventhought it works for pox, it will be difficult for ODL
-        if self.conType == 'POX':
-            self.logger.info('Patching POX integration with fs')
+        if self.conType == 'POX' or self.conType == 'RYU':
+            self.logger.info('Patching {} integration with fs'.format(self.conType))
             for component in self.components:
                 self.logger.debug("Starting OF Controller Component {}".format(component))
                 load_pox_component(component)
         elif self.conType == 'ODL':
             self.logger.info('Patching ODL integration with fs')
+            for component in self.components:
+                self.logger.debug("Starting OF Controller Component {}".format(component))
+                load_odl_component(component)
         else:
             raise Exception('Other controller types not supported as of now.')

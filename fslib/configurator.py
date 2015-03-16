@@ -474,7 +474,7 @@ class FsConfigurator(object):
                     pollPeriod = eval(rdict.get('pollPeriod'))
                    
                     # extend this when adding more contollers are supported
-                    if conType == 'POX' or conType == 'ODL':
+                    if conType == 'POX' or conType == 'ODL' or conType == 'RYU':
                         # no point in running simulations with controllers
                         self.__wait_until_controller(conType, conAddr, conPort,\
                                                      timeOut, pollPeriod)
